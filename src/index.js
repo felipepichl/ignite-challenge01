@@ -13,10 +13,10 @@ const users = [];
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
 
-  const userAlreadyExists = users.find(user => user.username === username);
+  const user = users.find((user) => user.username === username);
 
-  if (!userAlreadyExists) {
-    return response.status(400).json({ error: 'User already exists' });
+  if (!user) {
+    return response.status(404).json({ error: 'User already exists' });
   }
 
   request.user = user;
@@ -26,19 +26,19 @@ function checksExistsUserAccount(request, response, next) {
 
 app.post('/users', (request, response) => {
   const { name, username } = request.body;
-
+ 
+  const userAlreadyExists = users.some(user => user.username === username);
+  
+  if (userAlreadyExists) {
+    return response.status(400).json({ error: 'User already exists' });
+  }
+  
   const user = {
     id: uuidv4(),
     name,
     username,
     todos: [],
   };
-
-  const userAlreadyExists = users.find(user => user.username === username);
-
-  if (userAlreadyExists) {
-    return response.status(400).json({ error: 'User already exists' });
-  }
   
   users.push(user);
 
@@ -46,15 +46,27 @@ app.post('/users', (request, response) => {
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
-  const user = request.user;
+  const { user } = request;
 
-  return response.status(200).json({
-    todos: user.todos,
-  });
+  return response.json(user.todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+  const { title, deadline } = request.body;
+
+  const todoOperation = {
+    id: uuidv4(),
+    title,
+    done: false,
+    deadline: new Date(deadline),
+    created_at: new Date(), 
+  }
+
+  user.todos.push(todoOperation);
+
+  return response.status(201).json(todoOperation)
+
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {

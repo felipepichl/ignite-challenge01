@@ -24,11 +24,11 @@ function checksExistsUserAccount(request, response, next) {
   return next();
 }
 
-function checksExistsTodo(user, id) {
+function checksExistsToDo(user, id) {
   const todo = user.todos.find((todo) => todo.id === id);
 
   if(!todo){
-    // return error
+    throw new Error('ToDo not found')
   }
 
   return todo;
@@ -84,20 +84,17 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body;
   const { user } = request;
 
-  // const todo = user.todos.find(operation => operation.id === id);
+  try {
 
-  // if(!todo){
-  //   return response.status(404).json({
-  //     error: "ToDo not found"
-  //   })
-  // }
-  
-  const todo = checksExistsTodo(user, id);
-    
-  todo.title = title,
-  todo.deadline = new Date(deadline);
-    
-  return response.status(200).json(todo);
+    const todo = checksExistsToDo(user, id);
+      
+    todo.title = title,
+    todo.deadline = new Date(deadline);
+      
+    return response.status(200).json(todo);
+  } catch (err) {
+    return response.status(404).json({ error: err.message })
+  }
 
 });
 
@@ -105,24 +102,21 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
   const { id } = request.params;
   const { user } = request;
 
-  const todo = user.todos.find(operation => operation.id === id);
-  
-  if(!todo){
-    return response.status(404).json({
-      error: "ToDo not found"
-    })
+  try {
+
+    const todo = checksExistsToDo(user, id);
+      
+    todo.done = true;
+    
+    return response.status(200).json(todo);
+  } catch (err) {
+    return response.status(404).json({ error: err.message })
   }
-  
-  // const todo = checksExistsTodo(user, id);
-
-  todo.done = true;
-
-  return response.status(200).json(todo);
 
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  
 });
 
 module.exports = app;

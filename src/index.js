@@ -76,7 +76,6 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   user.todos.push(todoOperation);
 
   return response.status(201).json(todoOperation)
-
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
@@ -123,7 +122,10 @@ app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
     
     const todo = checksExistsToDo(user, id); 
 
+    user.todos.splice(todo, 1);
 
+    return response.status(204).send();
+  
   } catch (err) {
     return response.status(404).json({ error: err.message })
   }

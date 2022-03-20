@@ -116,7 +116,17 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  
+  const { id } = request.params;
+  const { user } = request;
+
+  try {
+    
+    const todo = checksExistsToDo(user, id); 
+
+
+  } catch (err) {
+    return response.status(404).json({ error: err.message })
+  }
 });
 
 module.exports = app;

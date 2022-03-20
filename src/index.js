@@ -24,6 +24,16 @@ function checksExistsUserAccount(request, response, next) {
   return next();
 }
 
+function checksExistsTodo(user, id) {
+  const todo = user.todos.find((todo) => todo.id === id);
+
+  if(!todo){
+    // return error
+  }
+
+  return todo;
+}
+
 app.post('/users', (request, response) => {
   const { name, username } = request.body;
  
@@ -74,19 +84,36 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const { title, deadline } = request.body;
   const { user } = request;
 
-  const todo = user.todos.find(operation => operation.id === id);
+  // const todo = user.todos.find(operation => operation.id === id);
 
+  // if(!todo){
+  //   return response.status(404).json({
+  //     error: "ToDo not found"
+  //   })
+  // }
+  
+  const todo = checksExistsTodo(user, id);
+    
   todo.title = title,
   todo.deadline = new Date(deadline);
-
+    
   return response.status(200).json(todo);
+
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
   const { id } = request.params;
   const { user } = request;
 
-  const todo = user.todos.find(todo => todo.id === id);
+  const todo = user.todos.find(operation => operation.id === id);
+  
+  if(!todo){
+    return response.status(404).json({
+      error: "ToDo not found"
+    })
+  }
+  
+  // const todo = checksExistsTodo(user, id);
 
   todo.done = true;
 
